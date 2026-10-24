@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LionX AI - Elite Control</title>
+    <script src="telegram-web-app.js"></script>
+
+    <style>
+        /* 🌀 ANIMATIONS DYNAMIQUES LIONX AI */
+        @keyframes pulseAnalyse {
+            0% { opacity: 0.4; transform: scale(0.98); }
+            50% { opacity: 1; transform: scale(1.02); }
+            100% { opacity: 0.4; transform: scale(0.98); }
+        }
+
+        .en-cours-danalyse {
+            animation: pulseAnalyse 1.5s infinite !important;
+            background: linear-gradient(90deg, #ff4500 0%, #ff8c00 100%) !important;
+            box-shadow: 0 0 15px rgba(255, 69, 0, 0.4) !important;
+        }
+
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; -webkit-user-select: none; user-select: none; }
+        body { background-color: #0b0713; color: #ffffff; min-height: 100vh; padding-bottom: 90px; overflow-x: hidden; }
+        .app-header { display: flex; align-items: center; justify-content: space-between; padding: 15px; border-bottom: 1px solid #1f1435; width: 100%; max-width: 450px; margin: 0 auto; }
+        .app-info { display: flex; align-items: center; gap: 10px; }
+        .app-logo { width: 36px; height: 36px; background: linear-gradient(135deg, #8a2be2, #4a0082); border-radius: 9px; box-shadow: 0 0 10px rgba(138,43,226,0.3); }
+        .app-name { font-weight: 800; font-size: 17px; }
+        .status-dot { width: 12px; height: 12px; background-color: #ff3b30; border-radius: 50%; box-shadow: 0 0 10px #ff3b30; }
+        .status-dot.connected { background-color: #34c759; box-shadow: 0 0 10px #34c759; }
+        .page { display: none; padding: 15px; width: 100%; max-width: 450px; margin: 0 auto; }
+        .page.active { display: block; }
+        .menu-box { background-color: #140e22; border: 1px solid #23163d; border-radius: 14px; padding: 15px; margin-bottom: 15px; }
+        .input-group { margin-bottom: 12px; text-align: left; }
+        .input-group label { display: block; font-size: 11px; color: #7f7597; text-transform: uppercase; margin-bottom: 5px; font-weight: bold; }
+        .input-field { width: 100%; padding: 12px; background-color: #0b0713; border: 1px solid #311c54; border-radius: 10px; color: white; font-size: 14px; outline: none; -webkit-user-select: text; user-select: text; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 14px; font-size: 16px; font-weight: bold; color: white; cursor: pointer; margin-bottom: 12px; text-align: center; display: block; transition: all 0.15s ease; }
+        .btn-gradient { background: linear-gradient(90deg, #9e00b3 0%, #ff4500 100%); box-shadow: 0 4px 15px rgba(255, 69, 0, 0.3); }
+        .btn-secondary { background-color: #140e22; border: 1px solid #23163d; color: #ffffff; font-size: 14px; }
+        .btn-pill { padding: 8px 16px; background-color: #1d1433; border: 1px solid #36225e; border-radius: 20px; color: #a59aba; font-size: 13px; cursor: pointer; font-weight: bold; }
+        .btn-pill.active { background: linear-gradient(90deg, #9e00b3 0%, #ff4500 100%); color: #fff; border: none; }
+        .grid-chips { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 15px 0; }
+        .chip { background-color: #1c1330; border: 1px solid #36225e; border-radius: 10px; padding: 12px 6px; text-align: center; font-size: 13px; font-weight: bold; cursor: pointer; color: #bcaee0; transition: all 0.15s ease; }
+        .chip.active { border: 2px solid #ff4500; background-color: #2b1347; color: #fff; }
+        .txt-profit { color: #34c759; font-weight: bold; }
+        .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 78px; background-color: #0b0713; border-top: 1px solid #1f1435; display: grid; grid-template-columns: repeat(3, 1fr); align-items: center; z-index: 100; }
+        .nav-item { text-align: center; color: #524b66; font-size: 11px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.15s ease; }
+        .nav-item.active { color: #ffffff; font-weight: bold; }
+        .nav-icon { font-size: 22px; }
+        .footer-tag { text-align: center; margin-top: 25px; font-size: 11px; color: #3d364d; font-weight: bold; }
+        .btn:active, .chip:active, .btn-pill:active, .nav-item:active { transform: scale(0.95); filter: brightness(0.9); }
+        .btn:hover, .chip:hover, .btn-pill:hover { filter: brightness(1.1); }
+    </style>
+</head>
+<body>
+    <div class="app-header">
+        <div class="app-info"><div class="app-logo"></div><div class="app-name">LionX AI</div></div>
+        <div id="conn-status-dot" class="status-dot"></div>
+    </div>
+            <!-- ================= ÉCRAN 1 : CONNEXION LIONX AI (STRUCTURE COMPAGNON) ================= -->
+    <div id="page-connexion" class="page active">
+        <div class="menu-box" style="text-align: center; margin-top: 10px;">
+            <h2 style="font-size: 18px; margin-bottom: 8px; font-weight: 800;">Liaison Pocket Option</h2>
+            <p style="font-size: 13px; color: #a59aba; margin-bottom: 20px;">Connectez votre compte pour basculer en mode de trading actif.</p>
+            
+            <div class="input-group">
+                <label>Adresse Email Pocket Option</label>
+                <input type="email" id="po-email" class="input-field" placeholder="exemple@email.com">
+            </div>
+            
+            <div class="input-group" style="margin-bottom: 20px;">
+                <label>Mot de passe</label>
+                <input type="password" id="po-password" class="input-field" placeholder="••••••••••••">
+            </div>
+            
+            <button type="submit" class="btn btn-gradient" id="btn-submit-connexion">CONNEXION</button>
+
+            <p id="txt-statut-liaison" style="font-size: 12px; color: #ff3b30; margin-top: 5px; font-weight: bold;">Statut : Non connecté</p>
+        </div>
+        <div class="footer-tag">Moteur d'authentification crypté LionX AI</div>
+    </div>
+
+
+               <!-- ================= ÉCRAN 2 : MOTEUR DE TRADING LIONX PREMIUM SECURISE ================= -->
+    <div id="page-trading" class="page">
+        
+        <!-- Bandeau des États Supérieur -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px;">
+            <div style="background: rgba(31, 20, 53, 0.6); border: 1px solid #2d1b4e; border-radius: 12px; padding: 8px; text-align: left;">
+                <p style="font-size: 10px; color: #a59aba; margin-bottom: 2px;">🟢 Solde démo</p>
+                <strong id="barre-solde-demo" style="font-size: 13px; color: #fff;">$50,100.83</strong>
+            </div>
+            <div style="background: rgba(31, 20, 53, 0.6); border: 1px solid #2d1b4e; border-radius: 12px; padding: 8px; text-align: left;">
+                <p style="font-size: 10px; color: #a59aba; margin-bottom: 2px;">🟣 Solde réel</p>
+                <strong id="barre-solde-reel" style="font-size: 13px; color: #fff;">$5.42</strong>
+            </div>
+            <div style="background: rgba(31, 20, 53, 0.6); border: 1px solid #2d1b4e; border-radius: 12px; padding: 8px; text-align: left; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <p style="font-size: 10px; color: #a59aba; margin-bottom: 2px;">⚡ Energy</p>
+                    <strong style="font-size: 13px; color: #fff;">95</strong>
+                </div>
+                <span style="font-size: 16px;">⚡</span>
+            </div>
+        </div>
+
+        <!-- Boutons de Commutation de Mode Ronds -->
+        <div style="display: flex; background-color: #140e22; border: 1px solid #23163d; border-radius: 30px; padding: 6px; margin-bottom: 20px; width: 100%;">
+            <button id="mode-demo" class="btn-pill active" style="flex: 1; padding: 14px; border-radius: 25px; display: flex; justify-content: center; align-items: center; gap: 8px;">
+                <span>MODE DÉMO</span><span style="width:8px; height:8px; background:#fff; border-radius:50%; display:inline-block;"></span>
+            </button>
+            <button id="mode-reel" class="btn-pill" style="flex: 1; padding: 14px; border-radius: 25px; display: flex; justify-content: center; align-items: center; gap: 8px; background: transparent; color: #7f7597;">
+                <span>MODE RÉEL</span><span style="width:8px; height:8px; background:#3d364d; border-radius:50%; display:inline-block;" id="point-mode-reel"></span>
+            </button>
+        </div>
+
+        <!-- 📊 BLOC DYNAMIQUE 1 : INTERFACE MODE DÉMO (Visible par défaut) -->
+        <div id="panneau-mode-demo" class="menu-box" style="position: relative; overflow: hidden; padding: 20px; margin-bottom: 15px; background: linear-gradient(145deg, #140e22 0%, #1a1033 100%); min-height: 220px;">
+            <!-- 🦁 Dessin Lion Sacré SVG Direct (Zéro réseau - Zéro blocage ORB) -->
+            <svg style="position: absolute; right: -10px; bottom: -10px; width: 150px; height: 150px; opacity: 0.12; pointer-events: none;" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <path d="M12 8v8M9 11h6"/>
+            </svg>
+            
+            <p style="font-size: 14px; color: #a59aba; margin-bottom: 5px;">Votre solde démo</p>
+            <strong style="font-size: 32px; font-weight: 800; display: block; margin-bottom: 20px;" id="txt-grand-solde-demo">$50,100.83</strong>
+            
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 25px; position: relative; z-index: 2;">
+                <div style="background: rgba(11, 7, 19, 0.6); padding: 12px 8px; border-radius: 12px; border: 1px solid #1f1435;">
+                    <p style="font-size: 10px; color: #7f7597; margin-bottom: 4px;">Bénéfice historique</p>
+                    <strong style="font-size: 13px; color: #34c759;">+$200.25</strong>
+                </div>
+                <div style="background: rgba(11, 7, 19, 0.6); padding: 12px 8px; border-radius: 12px; border: 1px solid #1f1435;">
+                    <p style="font-size: 10px; color: #7f7597; margin-bottom: 4px;">Métiers</p>
+                    <strong style="font-size: 13px; color: #fff;">106</strong>
+                </div>
+                <div style="background: rgba(11, 7, 19, 0.6); padding: 12px 8px; border-radius: 12px; border: 1px solid #1f1435;">
+                    <p style="font-size: 10px; color: #7f7597; margin-bottom: 4px;">Taux de victoire</p>
+                    <strong style="font-size: 13px; color: #8a63ff;">58%</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🚨 BLOC DYNAMIQUE 2 : INTERFACE MODE RÉEL (Masqué par défaut) -->
+        <div id="panneau-mode-reel" style="display: none;">
+            <div class="menu-box" style="position: relative; overflow: hidden; padding: 20px; margin-bottom: 15px; background: linear-gradient(145deg, #140e22 0%, #1a1033 100%);">
+                <!-- 🦁 Dessin Lion Sacré SVG Direct -->
+                <svg style="position: absolute; right: -10px; bottom: -10px; width: 150px; height: 150px; opacity: 0.12; pointer-events: none;" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    <path d="M12 8v8M9 11h6"/>
+                </svg>
+                <p style="font-size: 14px; color: #a59aba; margin-bottom: 5px;">Votre véritable solde</p>
+                <strong style="font-size: 32px; font-weight: 800; display: block; margin-bottom: 20px;" id="txt-grand-solde-reel">$5.42</strong>
+                
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 25px; position: relative; z-index: 2;">
+                    <div style="background: rgba(11, 7, 19, 0.6); padding: 12px 8px; border-radius: 12px; border: 1px solid #1f1435;">
+                        <p style="font-size: 10px; color: #7f7597; margin-bottom: 4px;">Bénéfice historique</p>
+                        <strong style="font-size: 13px; color: #ff3b30;">-$24.45</strong>
+                    </div>
+                    <div style="background: rgba(11, 7, 19, 0.6); padding: 12px 8px; border-radius: 12px; border: 1px solid #1f1435;">
+                        <p style="font-size: 10px; color: #7f7597; margin-bottom: 4px;">Métiers</p>
+                        <strong style="font-size: 13px; color: #fff;">64</strong>
+                    </div>
+                    <div style="background: rgba(11, 7, 19, 0.6); padding: 12px 8px; border-radius: 12px; border: 1px solid #1f1435;">
+                        <p style="font-size: 10px; color: #7f7597; margin-bottom: 4px;">Taux de victoire</p>
+                        <strong style="font-size: 13px; color: #8a63ff;">51%</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alerte Sécurité Solde Trop Faible -->
+            <div class="menu-box" style="background-color: rgba(35, 14, 28, 0.4); border: 1px solid #4a1224; border-radius: 14px; padding: 15px; margin-bottom: 15px; text-align: left;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span style="background-color: #4a1224; color: #ff4500; font-size: 11px; padding: 4px 8px; border-radius: 6px; font-weight: bold; text-transform: uppercase;">SOLDE TROP FAIBLE</span>
+                    <strong style="font-size: 14px; color: #a59aba;">$5.42</strong>
+                </div>
+                <p style="font-size: 13px; color: #bcaee0; line-height: 1.4;">Vous avez $5.42 disponible, mais même le plus petit pari d'ouverture a besoin de $10.00.</p>
+            </div>
+        </div>
+
+                <!-- 🔢 SÉLECTEUR DU NOMBRE DE PLACEMENTS (3, 6, 9) -->
+        <div style="margin-bottom: 20px; text-align: left; position: relative; z-index: 10;">
+            <p style="font-size: 11px; color: #a59aba; margin-bottom: 8px; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;">Nombre de placements successifs</p>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                <button id="btn-trades-3" type="button" style="padding: 12px; border-radius: 10px; border: 2px solid #ff4500; background: #2b1347; color: white; font-weight: bold; cursor: pointer; font-size: 13px;">3 TRADES</button>
+                <button id="btn-trades-6" type="button" style="padding: 12px; border-radius: 10px; border: 1px solid #36225e; background: #1c1330; color: #7f7597; font-weight: bold; cursor: pointer; font-size: 13px;">6 TRADES</button>
+                <button id="btn-trades-9" type="button" style="padding: 12px; border-radius: 10px; border: 1px solid #36225e; background: #1c1330; color: #7f7597; font-weight: bold; cursor: pointer; font-size: 13px;">9 TRADES</button>
+            </div>
+        </div>
+
+        <!-- 🕹️ ZONE DES BOUTONS PRINCIPAUX DE COMMANDE -->
+        <div id="zone-action-demo">
+            <button class="btn btn-gradient" id="btn-action-trade" style="padding: 16px; font-size: 16px;">Commencer à trader</button>
+            <p style="font-size: 12px; color: #7f7597; margin-top: -5px; margin-bottom: 20px; text-align: center;">Coût du trade : <span style="color: #34c759; font-weight: bold;">Gratuit une fois par jour</span></p>
+        </div>
+        
+                <div id="zone-action-reel" style="display: none;">
+            <!-- 🎯 FORCE CLIC : Appel direct de la fonction d'ouverture de la fenêtre -->
+            <button class="btn btn-gradient" id="btn-action-depot" style="padding: 16px; font-size: 16px; background: linear-gradient(90deg, #ff4500 0%, #9e00b3 100%); margin-bottom: 20px;" onclick="ouvrirFenetreDepot(event)">Dépôt ouvert</button>
+        </div>
+
+        <!-- 🌐 PASSERELLES EXTERNES DE GESTION -->
+        <div class="menu-box" style="display: flex; justify-content: space-between; align-items: center; padding: 15px; margin-bottom: 12px; cursor: pointer; background: #140e22;" onclick="alert('🔗 Redirection vers vos transactions Pocket Option...')">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 32px; height: 32px; background-color: #0052ff; border-radius: 8px; display: flex; justify-content: center; align-items: center; font-weight: bold; color: white; font-size: 14px;">P</div>
+                <div style="text-align: left;">
+                    <strong style="font-size: 14px; display: block;">Pocket Options</strong>
+                    <span style="font-size: 11px; color: #7f7597;">Visualisez vos transactions en direct sur Poc...</span>
+                </div>
+            </div>
+            <span style="color: #7f7597; font-size: 16px;">➔</span>
+        </div>
+
+        <button class="btn btn-secondary" style="padding: 15px; font-size: 14px; border-radius: 12px; margin-bottom: 15px;" onclick="alert('💼 Ouverture de votre Gestionnaire Personnel...')">Gestionnaire personnel</button>
+    </div>
+
+
+
+    <!-- ================= ÉCRAN 3 : PROFIL DE FIDRASCO ================= -->
+    <div id="page-profil" class="page">
+        <div class="menu-box" style="display: flex; align-items: center; gap: 12px; margin-top:10px;">
+            <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #ff4500, #9e00b3); border-radius: 50%;"></div>
+            <div>
+                <h3 style="font-size:16px; font-weight:800;">Fidrasco67</h3>
+                <p id="lbl-status-profil" style="font-size:12px; color:#ff3b30; font-weight:bold; margin-top:2px;">• Hors ligne</p>
+            </div>
+        </div>
+        <div class="menu-box">
+            <p style="color: #7f7597; font-size: 11px; font-weight: bold; text-transform: uppercase; margin-bottom: 10px;">Informations Licence</p>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span>Type :</span><strong>Version Or Premium</strong></div>
+            <div style="display: flex; justify-content: space-between;"><span>Validité :</span><strong style="color: #34c759;">Illimitée</strong></div>
+        </div>
+
+                <!-- 💳 FIN DE LA CARTE LICENCE ET DEBUT CONSOLE DE CONCEPTEUR -->
+        <div id="panel-admin-distribution" style="margin-top: 15px; margin-bottom: 15px; background: rgba(31, 20, 53, 0.4); border: 1px solid #251642; border-radius: 14px; padding: 15px; text-align: left; position: relative; z-index: 99;">
+            <p style="font-size: 11px; color: #ffb076; text-transform: uppercase; font-weight: bold; margin-bottom: 8px; letter-spacing: 0.5px;">⚙️ Console Administrateur : Créditer Energy</p>
+            
+            <!-- Case de saisie du montant de recharge -->
+            <input id="input-admin-montant-energy" type="number" value="100" min="1" style="width: 100%; padding: 10px; background: #0b0713; border: 1px solid #36225e; border-radius: 8px; color: white; font-weight: bold; font-size: 14px; margin-bottom: 12px; outline: none; box-sizing: border-box;" placeholder="Quantité à attribuer...">
+            
+            <!-- Bouton d'action -->
+            <button id="btn-admin-recharge-energy" type="button" style="background: linear-gradient(90deg, #9e00b3 0%, #00c7b1 100%); color: white; font-weight: bold; border-radius: 10px; padding: 10px; width: 100%; border: none; cursor: pointer; font-size: 13px; box-shadow: 0 0 10px rgba(0, 199, 177, 0.1);">
+                ⚡ ACCORDER L'ÉNERGIE
+            </button>
+        </div>
+               <!-- 💳 FIN DE LA CONSOLE ADMINISTRATEUR -->
+
+        <button class="btn btn-secondary" onclick="tg.showAlert('💬 Un conseiller va vous contacter.')">Contacter le Support Technique</button>
+        <div class="footer-tag">@lionx_gold_v4_bot</div>
+
+    </div> <!-- 🌟 SÉCURITÉ : AJOUT DE CETTE BALISE POUR FERMER PROPREMENT L'ÉCRAN PROFIL -->
+
+    <!-- Barre de Navigation Basse Réparée -->
+    <div id="main-nav" class="nav-bar">
+        <div class="nav-item active" id="nav-connexion" onclick="switchPage('connexion')"><span class="nav-icon">🔑</span><span>Liaison</span></div>
+        <div class="nav-item" id="nav-trading" onclick="switchPage('trading')"><span class="nav-icon">📊</span><span>Trading</span></div>
+        <div class="nav-item" id="nav-profil" onclick="switchPage('profil')"><span class="nav-icon">👤</span><span>Profil</span></div>
+    </div>
+
+        <script>
+        // Initialisation sécurisée du SDK Telegram WebApp
+        let tg = null;
+        if (window.Telegram && window.Telegram.WebApp) {
+            tg = window.Telegram.WebApp;
+            tg.expand();
+        }
+        
+               let currentMode = 'demo';
+        let currentMiseValue = 1.00;
+        let estConnecte = false;
+        let nombrePlacementsChoisis = 3; // 🌟 AJOUT CHIRURGICAL : Fixe la valeur par défaut à 3
+
+        // Fonction d'alerte universelle (Telegram ou Navigateur Standard)
+        function afficherMessageAlerte(texte) {
+            if (tg && typeof tg.showAlert === 'function') {
+                tg.showAlert(texte);
+            } else {
+                alert(texte);
+            }
+        }
+
+        // ========================================================
+        // 🎯 ZONE DE RECONNAISSANCE GLOBALE ET ARMEMENT DES BOUTONS
+        // ========================================================
+        window.addEventListener('DOMContentLoaded', function() {
+            // 1. RECONNAISSANCE DU BOUTON DE CONNEXION
+            const btnConnexion = document.getElementById('btn-submit-connexion');
+            if (btnConnexion) {
+                btnConnexion.addEventListener('click', function(evenement) {
+                    evenement.preventDefault();
+                    const email = document.getElementById('po-email').value;
+                    const password = document.getElementById('po-password').value;
+                    
+                    if (!email || !password) {
+                        afficherMessageAlerte("⚠️ Veuillez renseigner votre email et votre mot de passe.");
+                        return;
+                    }
+
+                    estConnecte = true;
+                    this.innerText = "COMPTE CONNECTÉ ✅";
+                    this.style.background = "linear-gradient(90deg, #34c759 0%, #00c7b1 100%)";
+                    
+                    const txtStatut = document.getElementById('txt-statut-liaison');
+                    if (txtStatut) {
+                        txtStatut.innerText = "Statut : Session Active dans l'Application";
+                        txtStatut.style.color = "#34c759";
+                    }
+                    
+                    const pointLumineux = document.getElementById('conn-status-dot');
+                    if (pointLumineux) {
+                        pointLumineux.style.backgroundColor = "#34c759";
+                        pointLumineux.style.boxShadow = "0 0 10px #34c759";
+                    }
+
+                    const lblProfil = document.getElementById('lbl-status-profil');
+                    if (lblProfil) {
+                        lblProfil.innerText = "• En ligne";
+                        lblProfil.style.setProperty('color', '#34c759', 'important');
+                        lblProfil.style.fontWeight = "bold";
+                    }
+                    
+                    afficherMessageAlerte("🎉 Connexion réussie !\nVotre compte est désormais actif au sein du protocole LionX AI.");
+                    switchPage('trading');
+                });
+            }
+
+            // 2. RECONNAISSANCE DU BOUTON DÉPÔT OUVERT
+            const btnDepot = document.getElementById('btn-action-depot');
+            const popup = document.getElementById('popup-depot');
+            if (btnDepot && popup) {
+                btnDepot.addEventListener('click', function(evenement) {
+                    evenement.preventDefault();
+                    popup.style.setProperty('display', 'flex', 'important');
+                });
+            }
+
+            // 3. RECONNAISSANCE DU BOUTON FERMER LA POP-UP (CROIX X)
+            const btnFermer = document.getElementById('btn-fermer-depot');
+            if (btnFermer && popup) {
+                btnFermer.addEventListener('click', function(evenement) {
+                    evenement.preventDefault();
+                    popup.style.setProperty('display', 'none', 'important');
+                });
+            }
+
+            // 4. LOGIQUE DE COMMUTATION DES COMPTEURS (DÉMO / RÉEL)
+            const btnDemo = document.getElementById('mode-demo');
+            const btnReel = document.getElementById('mode-reel');
+
+            if (btnDemo && btnReel) {
+                btnDemo.addEventListener('click', function() {
+                    currentMode = 'demo';
+                    this.style.background = "linear-gradient(90deg, #9e00b3 0%, #ff4500 100%)";
+                    this.style.color = "#fff";
+                    
+                    btnReel.style.background = "transparent";
+                    btnReel.style.color = "#7f7597";
+                    
+                    const ptReel = document.getElementById('point-mode-reel');
+                    if (ptReel) ptReel.style.backgroundColor = "#3d364d";
+                    
+                    document.getElementById('panneau-mode-demo').style.display = 'block';
+                    document.getElementById('zone-action-demo').style.display = 'block';
+                    document.getElementById('panneau-mode-reel').style.display = 'none';
+                    document.getElementById('zone-action-reel').style.display = 'none';
+                });
+
+                btnReel.addEventListener('click', function() {
+                    currentMode = 'reel';
+                    this.style.background = "linear-gradient(90deg, #9e00b3 0%, #ff4500 100%)";
+                    this.style.color = "#fff";
+                    
+                    const ptReel = document.getElementById('point-mode-reel');
+                    if (ptReel) ptReel.style.backgroundColor = "#fff";
+                    
+                    btnDemo.style.background = "transparent";
+                    btnDemo.style.color = "#7f7597";
+                    
+                    document.getElementById('panneau-mode-demo').style.display = 'none';
+                    document.getElementById('zone-action-demo').style.display = 'none';
+                    document.getElementById('panneau-mode-reel').style.display = 'block';
+                    document.getElementById('zone-action-reel').style.display = 'block';
+                });
+            }
+
+                // 5. ÉCOUTEUR DU BOUTON DE TRADING PRINCIPAL (CONSOMMATION OPTIMISÉE : 2 ENERGY)
+            const btnTrade = document.getElementById('btn-action-trade');
+            if (btnTrade) {
+                btnTrade.addEventListener('click', function() {
+                    btnTrade.disabled = true;
+                    btnTrade.classList.add('en-cours-danalyse'); 
+                    
+                    let placementActuel = 0;
+                    const totalPlacementsSession = nombrePlacementsChoisis; 
+                    
+                    afficherMessageAlerte("🚀 Démarrage d'une session de " + totalPlacementsSession + " placements successifs.");
+
+                    function executerUnPlacement() {
+                        if (placementActuel < totalPlacementsSession) {
+                            placementActuel++;
+                            btnTrade.innerText = "⏳ PLACEMENT EN COURS (" + placementActuel + "/" + totalPlacementsSession + ")...";
+                            
+                            setTimeout(function() {
+                                // ⚡ DÉDUCTION ET MISE À JOUR DE L'ÉNERGIE (-2 Energy par placement)
+                                const listeCompteursEnergy = document.getElementsByTagName('strong');
+                                for (let i = 0; i < listeCompteursEnergy.length; i++) {
+                                    if (listeCompteursEnergy[i].previousElementSibling && listeCompteursEnergy[i].previousElementSibling.innerText.includes("Energy")) {
+                                        let valeurEnergy = parseInt(listeCompteursEnergy[i].innerText);
+                                        if (valeurEnergy >= 2) {
+                                            valeurEnergy -= 2;
+                                            listeCompteursEnergy[i].innerText = valeurEnergy;
+                                        }
+                                    }
+                                }
+
+                                const gagne = Math.random() < 0.58; 
+                                const montantMise = currentMiseValue;
+                                
+                                if (gagne) {
+                                    const profit = montantMise * 0.92; 
+                                    if (currentMode === 'demo') {
+                                        let sd = parseFloat(document.getElementById('barre-solde-demo').innerText.replace('$', ''));
+                                        sd += profit;
+                                        document.getElementById('barre-solde-demo').innerText = '$' + sd.toFixed(2);
+                                        document.getElementById('txt-grand-solde-demo').innerText = '$' + sd.toFixed(2);
+                                    } else {
+                                        véritableSoldeRéel += profit;
+                                        actualiserAffichageSelonSolde();
+                                    }
+                                    console.log("🟢 Placement " + placementActuel + " Gagné : +$" + profit.toFixed(2) + " | ⚡ Energy -2");
+                                } else {
+                                    if (currentMode === 'demo') {
+                                        let sd = parseFloat(document.getElementById('barre-solde-demo').innerText.replace('$', ''));
+                                        sd -= montantMise;
+                                        document.getElementById('barre-solde-demo').innerText = '$' + sd.toFixed(2);
+                                        document.getElementById('txt-grand-solde-demo').innerText = '$' + sd.toFixed(2);
+                                    } else {
+                                        véritableSoldeRéel -= montantMise;
+                                        actualiserAffichageSelonSolde();
+                                    }
+                                    console.log("🔴 Placement " + placementActuel + " Perdu : -$" + montantMise.toFixed(2) + " | ⚡ Energy -2");
+                                }
+                                
+                                if (tg && typeof tg.sendData === 'function') {
+                                    tg.sendData(JSON.stringify({ 
+                                        action: "placement_execute",
+                                        numero: placementActuel,
+                                        total: totalPlacementsSession,
+                                        statut: gagne ? "gagne" : "perdu",
+                                        mode: currentMode
+                                    }));
+                                }
+
+                                executerUnPlacement();
+                            }, 3000); 
+                            
+                        } else {
+                            afficherMessageAlerte("✅ Session terminée avec succès ! Le robot a exécuté vos " + totalPlacementsSession + " placements.");
+                            btnTrade.innerText = "COMMENCER À TRADER";
+                            btnTrade.classList.remove('en-cours-danalyse'); 
+                            btnTrade.disabled = false;
+                        }
+                    }
+
+                    executerUnPlacement();
+                });
+            }
+
+
+                // 🤖 SIMULATION DE RECEPTION DU CONSEIL DE PLACEMENT LIONX AI
+        function recevoirRecommandationIA() {
+            const txtIA = document.getElementById('txt-IA-recommandation');
+            if (!txtIA) return;
+
+            // Liste des recommandations simulées envoyées par le moteur
+            const conseils = [
+                { texte: "💡 Marché stable : Recommandation 3 Trades", num: 3 },
+                { texte: "📊 Tendance régulière : Recommandation 6 Trades", num: 6 },
+                { texte: "🔥 Forte impulsion : Recommandation 9 Trades", num: 9 }
+            ];
+
+            // Sélection aléatoire simulant l'analyse de la console noire
+            const choix = conseils[Math.floor(Math.random() * conseils.length)];
+            
+            txtIA.innerText = choix.texte;
+            txtIA.style.color = "#34c759"; // Passe au vert pour signaler que l'analyse est prête
+            
+            // Auto-sélection visuelle du bouton recommandé pour aider l'utilisateur
+            const btnRecommande = document.getElementById('btn-trades-' + choix.num);
+            if (btnRecommande) {
+                selectionnerNombreTrades(choix.num, btnRecommande);
+            }
+        }
+
+        // Déclencher l'analyse automatique 1.5 seconde après l'ouverture de l'écran
+        setTimeout(recevoirRecommandationIA, 1500);
+
+
+        // ========================================================
+        // ⚙️ GESTIONNAIRE DE NAVIGATION ENTRE LES PAGES
+        // ========================================================
+        function switchPage(pageId) {
+            document.getElementById('page-connexion').classList.remove('active');
+            document.getElementById('page-trading').classList.remove('active');
+            document.getElementById('page-profil').classList.remove('active');
+            
+            document.getElementById('nav-connexion').classList.remove('active');
+            document.getElementById('nav-trading').classList.remove('active');
+            document.getElementById('nav-profil').classList.remove('active');
+            
+            document.getElementById('page-' + pageId).classList.add('active');
+            document.getElementById('nav-' + pageId).classList.add('active');
+        }
+
+        document.getElementById('nav-connexion').addEventListener('click', function() { switchPage('connexion'); });
+        document.getElementById('nav-trading').addEventListener('click', function() { switchPage('trading'); });
+        document.getElementById('nav-profil').addEventListener('click', function() { switchPage('profil'); });
+
+                // 6. LOGIQUE DE DEPOT DYNAMIQUE AVEC VALIDATION DU SOLDE (MODE SIMULATION)
+        let véritableSoldeRéel = 5.42; // Solde de départ actuel
+
+        function actualiserAffichageSelonSolde() {
+            // 1. Mise à jour des textes des compteurs sur tous les écrans
+            const barreReel = document.getElementById('barre-solde-reel');
+            const grandSoldeReel = document.getElementById('txt-grand-solde-reel');
+            
+            if (barreReel) barreReel.innerText = '$' + véritableSoldeRéel.toFixed(2);
+            if (grandSoldeReel) grandSoldeReel.innerText = '$' + véritableSoldeRéel.toFixed(2);
+
+            // 2. Vérification chirurgicale du seuil des 10 dollars
+            if (véritableSoldeRéel >= 10.00) {
+                // A. On masque le panneau d'alerte rouge "Solde trop faible"
+                const blocsBox = document.getElementsByClassName('menu-box');
+                for (let i = 0; i < blocsBox.length; i++) {
+                    if (blocsBox[i].innerText.includes("SOLDE TROP FAIBLE")) {
+                        blocsBox[i].style.display = 'none';
+                    }
+                }
+                
+                // B. On permute les boutons : On éteint "Dépôt ouvert" et on allume "Commencer à trader"
+                document.getElementById('zone-action-reel').style.display = 'none';
+                document.getElementById('zone-action-demo').style.display = 'block';
+                
+                afficherMessageAlerte("💰 Solde mis à jour avec succès !\nVotre compte réel est désormais approvisionné. Le bouton de trading est débloqué !");
+            }
+        }
+
+        function declencherDepotForfait(nomForfait, montant) {
+            // 1. Simulation de l'encaissement immédiat du forfait choisi
+            véritableSoldeRéel += montant;
+            
+            // 2. Redirection visuelle vers la page officielle en tâche de fond (Méthode de votre ami)
+            const urlPocket = "https://pocketoption.com";
+            if (tg && typeof tg.openLink === 'function') {
+                tg.openLink(urlPocket); 
+            } else {
+                window.open(urlPocket, '_blank'); 
+            }
+            
+            // 3. Fermeture du volet de recharge
+            const popup = document.getElementById('popup-depot');
+            if (popup) {
+                popup.style.setProperty('display', 'none', 'important');
+            }
+            
+            // 4. Lancement de la vérification du solde pour changer le bouton
+            actualiserAffichageSelonSolde();
+        }
+
+        // 🤖 7. SYSTEME DE RECEPTION DU CONSEIL DE PLACEMENT LIONX AI
+        function recevoirRecommandationIA() {
+            const txtIA = document.getElementById('txt-IA-recommandation');
+            if (!txtIA) return;
+
+            // Liste des recommandations simulées envoyées par le moteur
+            const conseils = [
+                { texte: "💡 Marché stable : Recommandation 3 Trades", num: 3 },
+                { texte: "📊 Tendance régulière : Recommandation 6 Trades", num: 6 },
+                { texte: "🔥 Forte impulsion : Recommandation 9 Trades", num: 9 }
+            ];
+
+            // Sélection aléatoire simulant l'analyse de la console noire
+            const choix = conseils[Math.floor(Math.random() * conseils.length)];
+            
+            txtIA.innerText = choix.texte;
+            txtIA.style.color = "#34c759"; // Passe au vert pour signaler que l'analyse est prête
+            
+            // Auto-sélection visuelle du bouton recommandé pour aider l'utilisateur
+            const btnRecommande = document.getElementById('btn-trades-' + choix.num);
+            if (btnRecommande) {
+                selectionnerNombreTrades(choix.num, btnRecommande);
+            }
+        }
+
+        // Déclencher l'analyse automatique 1.5 seconde après l'ouverture de l'écran
+        setTimeout(recevoirRecommandationIA, 1500);
+
+
+                // 7. GESTIONNAIRE À CHOIX UNIQUE POUR LES PLACEMENTS (3, 6 ou 9)
+        function selectionnerNombreTrades(nombre, boutonActive) {
+            nombrePlacementsChoisis = nombre;
+            
+            const btn3 = document.getElementById('btn-trades-3');
+            const btn6 = document.getElementById('btn-trades-6');
+            const btn9 = document.getElementById('btn-trades-9');
+            
+            if (btn3) { btn3.style.border = "1px solid #36225e"; btn3.style.background = "#1c1330"; btn3.style.color = "#7f7597"; }
+            if (btn6) { btn6.style.border = "1px solid #36225e"; btn6.style.background = "#1c1330"; btn6.style.color = "#7f7597"; }
+            if (btn9) { btn9.style.border = "1px solid #36225e"; btn9.style.background = "#1c1330"; btn9.style.color = "#7f7597"; }
+            
+            boutonActive.style.border = "2px solid #ff4500";
+            boutonActive.style.background = "#2b1347";
+            boutonActive.style.color = "white";
+        }
+
+        const b3 = document.getElementById('btn-trades-3');
+        const b6 = document.getElementById('btn-trades-6');
+        const b9 = document.getElementById('btn-trades-9');
+
+        if (b3) b3.addEventListener('click', function() { selectionnerNombreTrades(3, this); });
+        if (b6) b6.addEventListener('click', function() { selectionnerNombreTrades(6, this); });
+        if (b9) b9.addEventListener('click', function() { selectionnerNombreTrades(9, this); });
+
+                        // 🎯 INTERCEPTEUR GLOBAL DE SECOURS POUR L'OUVERTURE DE LA FENÊTRE DE DEPOT
+        function ouvrirFenetreDepot(evenement) {
+            if (evenement) evenement.preventDefault(); // Bloque le saut de page
+            const popup = document.getElementById('popup-depot');
+            if (popup) {
+                popup.style.setProperty('display', 'flex', 'important');
+            }
+        }
+
+                // 🔑 9. CONSOLE CONCEPTEUR : ALLOCATION D'ÉNERGIE SÉLECTIONNABLE (ADMIN)
+        const btnAdminEnergy = document.getElementById('btn-admin-recharge-energy');
+        if (btnAdminEnergy) {
+            btnAdminEnergy.addEventListener('click', function(evenement) {
+                evenement.preventDefault();
+                
+                // 1. Récupération du montant saisi dans la case numérique
+                const boiteSaisie = document.getElementById('input-admin-montant-energy');
+                if (!boiteSaisie) return;
+                
+                let montantAInjecter = parseInt(boiteSaisie.value);
+                
+                // Sécurité si la case est vide ou invalide
+                if (isNaN(montantAInjecter) || montantAInjecter <= 0) {
+                    afficherMessageAlerte("⚠️ Veuillez inscrire une quantité d'énergie valide supérieure à 0.");
+                    return;
+                }
+                
+                // 2. Scan et mise à jour de tous les compteurs d'énergie de la Sandbox
+                const listeCompteursEnergy = document.getElementsByTagName('strong');
+                let compteurTrouve = false;
+                
+                for (let i = 0; i < listeCompteursEnergy.length; i++) {
+                    if (listeCompteursEnergy[i].previousElementSibling && listeCompteursEnergy[i].previousElementSibling.innerText.includes("Energy")) {
+                        let valeurEnergy = parseInt(listeCompteursEnergy[i].innerText);
+                        
+                        // Injection sur mesure !
+                        valeurEnergy += montantAInjecter; 
+                        listeCompteursEnergy[i].innerText = valeurEnergy;
+                        compteurTrouve = true;
+                    }
+                }
+                
+                if (compteurTrouve) {
+                    afficherMessageAlerte("⚡ [CRÉDIT ADMINISTRATEUR ACCORDÉ]\n+" + montantAInjecter + " Unités d'énergie injectées avec succès !");
+                }
+            });
+        }
+
+
+                // 🤖 10. SYSTEME DE RECEPTION DU CONSEIL DE PLACEMENT LIONX AI
+        function recevoirRecommandationIA() {
+            const txtIA = document.getElementById('txt-IA-recommandation');
+            if (!txtIA) return;
+
+            const conseils = [
+                { texte: "💡 Marché stable : Configuration 3 Trades conseillée" },
+                { texte: "📊 Tendance régulière : Configuration 6 Trades conseillée" },
+                { texte: "🔥 Forte impulsion : Configuration 9 Trades conseillée" }
+            ];
+
+            const choix = conseils[Math.floor(Math.random() * conseils.length)];
+            txtIA.innerText = choix.texte;
+            txtIA.style.color = "#34c759"; 
+        }
+
+                // Déclencher l'analyse automatique 1.5 seconde après l'ouverture de l'écran
+        setTimeout(recevoirRecommandationIA, 1500);
+
+    }); // 🌟 LE BLOC DOMCONTENTLOADED SE FERME ICI PROPREMENT
+    
+    
+    // ⚙️ 11. GESTIONNAIRE DE NAVIGATION ENTRE LES PAGES (DÉCLARATION GLOBALE EXTÉRIEURE)
+    function switchPage(pageId) {
+        document.getElementById('page-connexion').classList.remove('active');
+        document.getElementById('page-trading').classList.remove('active');
+        document.getElementById('page-profil').classList.remove('active');
+        
+        document.getElementById('nav-connexion').classList.remove('active');
+        document.getElementById('nav-trading').classList.remove('active');
+        document.getElementById('nav-profil').classList.remove('active');
+        
+        document.getElementById('page-' + pageId).classList.add('active');
+        document.getElementById('nav-' + pageId).classList.add('active');
+    }
+
+    // Ré-armement des clics pour les menus de navigation
+    document.getElementById('nav-connexion').addEventListener('click', function() { switchPage('connexion'); });
+    document.getElementById('nav-trading').addEventListener('click', function() { switchPage('trading'); });
+    document.getElementById('nav-profil').addEventListener('click', function() { switchPage('profil'); });
+
+</script> <!-- 🌟 FIN DÉFINITIVE DU SCRIPT JAVASCRIPT -->
+
+
+
+    <!-- ======================================================== -->
+    <!-- 💳 FENÊTRE FLOTTANTE AUTONOME : RECHARGER LE SOLDE ($10 ET $20) -->
+    <!-- ======================================================== -->
+    <div id="popup-depot" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(11, 7, 19, 0.95); z-index: 9999; padding: 15px; align-items: center; justify-content: center; width: 100%; height: 100%;">
+        <div class="menu-box" style="width: 100%; max-width: 420px; background: #140e22; border: 1px solid #23163d; border-radius: 20px; padding: 20px; position: relative; margin: auto;">
+            
+            <!-- Bouton de Fermeture X -->
+            <div id="btn-fermer-depot" style="position: absolute; right: 15px; top: 15px; width: 28px; height: 28px; background: rgba(255,255,255,0.05); border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; color: #a59aba; font-weight: bold;">✕</div>
+            
+            <h3 style="font-size: 16px; font-weight: 800; text-align: center; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.5px;">Recharger Le Solde</h3>
+            
+            <!-- Plan de Solde Commercial -->
+            <div style="background: rgba(31, 20, 53, 0.4); border: 1px solid #251642; border-radius: 14px; padding: 15px; margin-bottom: 20px; text-align: left;">
+                <p style="font-size: 11px; color: #7f7597; text-transform: uppercase; font-weight: bold; margin-bottom: 4px;">Solde Commercial</p>
+                <strong style="font-size: 24px; display: block; margin-bottom: 8px;">$5.42</strong>
+                <p style="font-size: 12px; color: #bcaee0; line-height: 1.4;">Votre solde actuel est de $5.42. La mise initiale sélectionnée nécessite $10.00. Choisissez un forfait et effectuez un dépôt unique éligible avant de commencer.</p>
+            </div>
+            
+            <h4 style="font-size: 12px; color: #7f7597; text-transform: uppercase; font-weight: bold; text-align: left; margin-bottom: 12px;">Forfaits Energy</h4>
+
+            <!-- Note d'avertissement jaune de lancement -->
+            <div style="background: rgba(255, 69, 0, 0.05); border: 1px solid rgba(255, 69, 0, 0.2); border-radius: 12px; padding: 12px; margin-bottom: 20px; text-align: left;">
+                <p style="font-size: 11px; color: #ffb076; line-height: 1.4; margin: 0;">Seul un dépôt unique correspondant au montant requis active un forfait ; les dépôts ne se cumulent pas. Une fois le forfait activé, seul un forfait supérieur peut le remplacer.</p>
+            </div>
+
+            <!-- Grille des Offres Configurations $10 et $20 -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px;">
+                <!-- Offre SILVER révisée -->
+                <div style="background: rgba(11, 7, 19, 0.6); border: 1px solid #23163d; border-radius: 16px; padding: 15px; text-align: center;">
+                    <p style="font-size: 11px; color: #7f7597; font-weight: bold; text-transform: uppercase; margin-bottom: 2px;">Silver</p>
+                    <strong style="font-size: 24px; display: block; margin-bottom: 10px;">$10</strong>
+                    <div style="background: rgba(255, 69, 0, 0.1); border-radius: 20px; padding: 4px 8px; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 15px;">
+                        <span style="color: #ff4500; font-size: 11px;">⚡ 300</span><span style="color: #7f7597; font-size: 10px;">/ jour</span>
+                    </div>
+                    <button class="btn btn-gradient" style="padding: 10px; font-size: 13px; margin-bottom: 0; border-radius: 10px;" onclick="declencherDepotForfait('Silver', 10)">Dépôt</button>
+                </div>
+                
+                <!-- Offre GOLD révisée -->
+                <div style="background: rgba(11, 7, 19, 0.6); border: 1px solid #23163d; border-radius: 16px; padding: 15px; text-align: center;">
+                    <p style="font-size: 11px; color: #7f7597; font-weight: bold; text-transform: uppercase; margin-bottom: 2px;">Gold</p>
+                    <strong style="font-size: 24px; display: block; margin-bottom: 10px;">$20</strong>
+                    <div style="background: rgba(255, 69, 0, 0.1); border-radius: 20px; padding: 4px 8px; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 15px;">
+                        <span style="color: #ff4500; font-size: 11px;">⚡ 600</span><span style="color: #7f7597; font-size: 10px;">/ jour</span>
+                    </div>
+                    <button class="btn btn-gradient" style="padding: 10px; font-size: 13px; margin-bottom: 0; border-radius: 10px;" onclick="declencherDepotForfait('Gold', 20)">Dépôt</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>
