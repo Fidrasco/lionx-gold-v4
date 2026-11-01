@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>LionX AI - Elite Control</title>
-    <script src="telegram-web-app.js"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <style>
         /* 🌀 ANIMATIONS DYNAMIQUES LIONX AI */
@@ -177,8 +177,13 @@
                 <p style="font-size: 13px; color: #bcaee0; line-height: 1.4;">Vous avez $5.42 disponible, mais même le plus petit pari d'ouverture a besoin de $10.00.</p>
             </div>
         </div>
+        <!-- 💵 CHOIX DE LA MISE DE DÉPART DE SESSION -->
+        <div style="margin-bottom: 20px; text-align: left; position: relative; z-index: 10;">
+            <p style="font-size: 11px; color: #a59aba; margin-bottom: 8px; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;">Mise de départ par placement ($)</p>
+            <input id="input-trade-mise" type="number" value="1" min="1" max="1000" style="width: 100%; padding: 12px; background: #140e22; border: 1px solid #23163d; border-radius: 10px; color: white; font-weight: bold; font-size: 14px; box-sizing: border-box; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='#9e00b3'" onblur="this.style.borderColor='#23163d'">
+        </div>
 
-                <!-- 🔢 SÉLECTEUR DU NOMBRE DE PLACEMENTS (3, 6, 9) -->
+        <!-- 🔢 SÉLECTEUR DU NOMBRE DE PLACEMENTS (3, 6, 9) -->
         <div style="margin-bottom: 20px; text-align: left; position: relative; z-index: 10;">
             <p style="font-size: 11px; color: #a59aba; margin-bottom: 8px; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;">Nombre de placements successifs</p>
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
@@ -194,8 +199,7 @@
             <p style="font-size: 12px; color: #7f7597; margin-top: -5px; margin-bottom: 20px; text-align: center;">Coût du trade : <span style="color: #34c759; font-weight: bold;">Gratuit une fois par jour</span></p>
         </div>
         
-                <div id="zone-action-reel" style="display: none;">
-            <!-- 🎯 FORCE CLIC : Appel direct de la fonction d'ouverture de la fenêtre -->
+        <div id="zone-action-reel" style="display: none;">
             <button class="btn btn-gradient" id="btn-action-depot" style="padding: 16px; font-size: 16px; background: linear-gradient(90deg, #ff4500 0%, #9e00b3 100%); margin-bottom: 20px;" onclick="ouvrirFenetreDepot(event)">Dépôt ouvert</button>
         </div>
 
@@ -211,10 +215,9 @@
             <span style="color: #7f7597; font-size: 16px;">➔</span>
         </div>
 
-        <button class="btn btn-secondary" style="padding: 15px; font-size: 14px; border-radius: 12px; margin-bottom: 15px;" onclick="alert('💼 Ouverture de votre Gestionnaire Personnel...')">Gestionnaire personnel</button>
-    </div>
-
-
+    <button class="btn btn-secondary" style="padding: 15px; font-size: 14px; border-radius: 12px; margin-bottom: 15px;" onclick="alert('💼 Ouverture de votre Gestionnaire Personnel...')">Gestionnaire personnel</button>
+    
+    </div> <!-- 🌟 SÉCURITÉ AJOUTÉE : Cette balise ferme enfin proprement la page de trading ! -->
 
     <!-- ================= ÉCRAN 3 : PROFIL DE FIDRASCO ================= -->
     <div id="page-profil" class="page">
@@ -383,88 +386,145 @@
                 });
             }
 
-                // 5. ÉCOUTEUR DU BOUTON DE TRADING PRINCIPAL (CONSOMMATION OPTIMISÉE : 2 ENERGY)
-            const btnTrade = document.getElementById('btn-action-trade');
-            if (btnTrade) {
-                btnTrade.addEventListener('click', function() {
-                    btnTrade.disabled = true;
-                    btnTrade.classList.add('en-cours-danalyse'); 
-                    
-                    let placementActuel = 0;
-                    const totalPlacementsSession = nombrePlacementsChoisis; 
-                    
-                    afficherMessageAlerte("🚀 Démarrage d'une session de " + totalPlacementsSession + " placements successifs.");
+               
+// ========================================================
+// 5. LIONX AI V10 - TRANSMISSION AU SERVEUR PYTHON
+// TEST DE COMMUNICATION UNIQUEMENT
+// ========================================================
 
-                    function executerUnPlacement() {
-                        if (placementActuel < totalPlacementsSession) {
-                            placementActuel++;
-                            btnTrade.innerText = "⏳ PLACEMENT EN COURS (" + placementActuel + "/" + totalPlacementsSession + ")...";
-                            
-                            setTimeout(function() {
-                                // ⚡ DÉDUCTION ET MISE À JOUR DE L'ÉNERGIE (-2 Energy par placement)
-                                const listeCompteursEnergy = document.getElementsByTagName('strong');
-                                for (let i = 0; i < listeCompteursEnergy.length; i++) {
-                                    if (listeCompteursEnergy[i].previousElementSibling && listeCompteursEnergy[i].previousElementSibling.innerText.includes("Energy")) {
-                                        let valeurEnergy = parseInt(listeCompteursEnergy[i].innerText);
-                                        if (valeurEnergy >= 2) {
-                                            valeurEnergy -= 2;
-                                            listeCompteursEnergy[i].innerText = valeurEnergy;
-                                        }
-                                    }
-                                }
+const btnTrade = document.getElementById('btn-action-trade');
 
-                                const gagne = Math.random() < 0.58; 
-                                const montantMise = currentMiseValue;
-                                
-                                if (gagne) {
-                                    const profit = montantMise * 0.92; 
-                                    if (currentMode === 'demo') {
-                                        let sd = parseFloat(document.getElementById('barre-solde-demo').innerText.replace('$', ''));
-                                        sd += profit;
-                                        document.getElementById('barre-solde-demo').innerText = '$' + sd.toFixed(2);
-                                        document.getElementById('txt-grand-solde-demo').innerText = '$' + sd.toFixed(2);
-                                    } else {
-                                        véritableSoldeRéel += profit;
-                                        actualiserAffichageSelonSolde();
-                                    }
-                                    console.log("🟢 Placement " + placementActuel + " Gagné : +$" + profit.toFixed(2) + " | ⚡ Energy -2");
-                                } else {
-                                    if (currentMode === 'demo') {
-                                        let sd = parseFloat(document.getElementById('barre-solde-demo').innerText.replace('$', ''));
-                                        sd -= montantMise;
-                                        document.getElementById('barre-solde-demo').innerText = '$' + sd.toFixed(2);
-                                        document.getElementById('txt-grand-solde-demo').innerText = '$' + sd.toFixed(2);
-                                    } else {
-                                        véritableSoldeRéel -= montantMise;
-                                        actualiserAffichageSelonSolde();
-                                    }
-                                    console.log("🔴 Placement " + placementActuel + " Perdu : -$" + montantMise.toFixed(2) + " | ⚡ Energy -2");
-                                }
-                                
-                                if (tg && typeof tg.sendData === 'function') {
-                                    tg.sendData(JSON.stringify({ 
-                                        action: "placement_execute",
-                                        numero: placementActuel,
-                                        total: totalPlacementsSession,
-                                        statut: gagne ? "gagne" : "perdu",
-                                        mode: currentMode
-                                    }));
-                                }
+const LIONX_API_URL =
+    "https://cookie-healthcare-technique-supplies.trycloudflare.com/api/commande";
 
-                                executerUnPlacement();
-                            }, 3000); 
-                            
-                        } else {
-                            afficherMessageAlerte("✅ Session terminée avec succès ! Le robot a exécuté vos " + totalPlacementsSession + " placements.");
-                            btnTrade.innerText = "COMMENCER À TRADER";
-                            btnTrade.classList.remove('en-cours-danalyse'); 
-                            btnTrade.disabled = false;
-                        }
-                    }
+if (btnTrade) {
 
-                    executerUnPlacement();
-                });
+    btnTrade.addEventListener('click', async function(evenement) {
+
+        evenement.preventDefault();
+
+        const champMise = document.getElementById('input-trade-mise');
+
+        const miseSaisie = parseFloat(champMise?.value);
+
+        const totalPlacementsSession = Number(nombrePlacementsChoisis);
+
+        // Vérification du mode
+        if (currentMode !== 'demo') {
+            afficherMessageAlerte(
+                "🔒 Les tests de LionX AI V10 sont actuellement limités au mode DÉMO."
+            );
+            return;
+        }
+
+        // Vérification de la mise
+        if (!Number.isFinite(miseSaisie) ||
+            miseSaisie <= 0 ||
+            miseSaisie > 1000) {
+
+            afficherMessageAlerte("⚠️ Veuillez saisir une mise valide.");
+            return;
+        }
+
+        // Vérification du nombre de placements
+        if (![3, 6, 9].includes(totalPlacementsSession)) {
+
+            afficherMessageAlerte(
+                "⚠️ Sélectionnez 3, 6 ou 9 placements."
+            );
+            return;
+        }
+
+        // Vérification de Telegram
+        if (!window.Telegram ||
+            !window.Telegram.WebApp ||
+            !window.Telegram.WebApp.initData) {
+
+            afficherMessageAlerte(
+                "⚠️ Ouvrez LionX AI V10 depuis Telegram pour continuer."
+            );
+            return;
+        }
+
+        const initData = window.Telegram.WebApp.initData;
+
+        btnTrade.disabled = true;
+        btnTrade.innerText = "⏳ CONNEXION AU SERVEUR...";
+        btnTrade.classList.add('en-cours-danalyse');
+
+        afficherMessageAlerte(
+            "📡 Transmission de votre commande à LionX AI V10..."
+        );
+
+        try {
+
+            const reponse = await fetch(LIONX_API_URL, {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+
+                    action: "demarrage_trading",
+                    session: totalPlacementsSession,
+                    mise: miseSaisie,
+                    mode: "demo",
+                    initData: initData
+
+                })
+
+            });
+
+            const resultat = await reponse.json();
+
+            if (!reponse.ok || !resultat.success) {
+                throw new Error(
+                    resultat.message || "Commande refusée par le serveur."
+                );
             }
+
+            console.log(
+                "🦁 LIONX AI V10 : COMMANDE REÇUE",
+                resultat
+            );
+
+            afficherMessageAlerte(
+                "✅ Commande reçue par le serveur Python !\n\n" +
+                "Mise : " + miseSaisie.toFixed(2) + " USD\n" +
+                "Session : " + totalPlacementsSession + " placements\n\n" +
+                "Aucun placement n'a été exécuté."
+            );
+
+            btnTrade.innerText = "COMMANDE TRANSMISE ✅";
+
+        } catch (erreur) {
+
+            console.error(
+                "❌ Erreur de communication LionX AI V10 :",
+                erreur
+            );
+
+            afficherMessageAlerte(
+                "❌ Impossible de joindre le serveur LionX AI V10.\n\n" +
+                erreur.message
+            );
+
+            btnTrade.innerText = "RÉESSAYER";
+
+        } finally {
+
+            btnTrade.disabled = false;
+            btnTrade.classList.remove('en-cours-danalyse');
+
+        }
+
+    });
+
+}
+
 
 
                 // 🤖 SIMULATION DE RECEPTION DU CONSEIL DE PLACEMENT LIONX AI
