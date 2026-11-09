@@ -395,7 +395,7 @@
 const btnTrade = document.getElementById('btn-action-trade');
 
 const LIONX_API_URL =
-    "https://assignments-thrown-bobby-receipt.trycloudflare.com/api/commande";
+    "https://loop-consumer-hash-cabinets.trycloudflare.com/api/commande";
 
 if (btnTrade) {
 
@@ -825,6 +825,62 @@ if (btnTrade) {
 
         </div>
     </div>
+<!-- TEST DE CONNEXION POCKET OPTION INTÉGRÉE -->
+<style>
+#btn-test-pocket {
+    position: fixed;
+    bottom: 18px;
+    right: 15px;
+    z-index: 9998;
+    background: #ff8a00;
+    color: white;
+    border: 0;
+    border-radius: 10px;
+    padding: 13px 17px;
+    font-weight: bold;
+}
+#pocket-integrated-test {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: #100b20;
+}
+#pocket-integrated-test iframe {
+    width: 100%;
+    height: calc(100% - 55px);
+    border: 0;
+    background: white;
+}
+#pocket-integrated-test button {
+    height: 55px;
+    width: 100%;
+    border: 0;
+    background: #ff8a00;
+    color: white;
+    font-weight: bold;
+}
+</style>
 
+<button id="btn-test-pocket" onclick="
+document.getElementById('pocket-integrated-test').style.display='block';
+">
+    TESTER CONNEXION INTÉGRÉE
+</button>
+
+<div id="pocket-integrated-test">
+    <button onclick="
+    document.getElementById('pocket-integrated-test').style.display='none';
+    ">
+        ← RETOUR À LIONX
+    </button>
+
+    <iframe
+        src="https://pocketoption.com/"
+        title="Connexion Pocket Option dans LionX"
+        allow="clipboard-read; clipboard-write; fullscreen"
+    ></iframe>
+</div>
+<!-- FIN DU TEST -->
 </body>
 </html>
